@@ -59,3 +59,75 @@ When starting a project quickly, it's important to conduct a **requirement analy
 - Admin can **manage multiple user accounts**.
 - Admin can **block or unblock users**.
 - Admin can **change user passwords**.
+
+# data modle
+To avoid confusion and maintain consistency, it’s important to define the data structure at the start.
+
+ give a example:
+### **Student Data Model**
+
+- `_id`: ObjectId (generated automatically)
+- `id`: String (unique ID for the student)
+- `password`: String (hashed password)
+- `name`: String (full name of the student)
+- `gender`: String (gender of the student)
+- `dateOfBirth`: Date (date of birth)
+- `email`: String (email address)
+- `contactNo`: String (phone number)
+- `emergencyContactNo`: String (emergency contact number)
+- `presentAddress`: String (current address)
+- `permanentAddress`: String (permanent address)
+- `guardian`: String (name of the guardian)
+- `localGuardian`: String (name of the local guardian)
+- `profileImage`: String (URL or path to profile image)
+- `status`: String (current status of the student, e.g., active, graduated)
+- `isDeleted`: Boolean (soft delete flag)
+- `createdAt`: Date (record creation date)
+- `updatedAt`: Date (record last update date)
+- `academicDepartment`: String (department the student is enrolled in)
+
+### **Faculty Data Model**
+
+- `_id`: ObjectId (generated automatically)
+- `id`: String (unique ID for the faculty)
+- `password`: String (hashed password)
+- `name`: String (full name of the faculty)
+- `gender`: String (gender of the faculty)
+- `dateOfBirth`: Date (date of birth)
+- `email`: String (email address)
+- `contactNo`: String (phone number)
+- `emergencyContactNo`: String (emergency contact number)
+- `presentAddress`: String (current address)
+- `permanentAddress`: String (permanent address)
+- `localGuardian`: String (name of the local guardian)
+- `profileImage`: String (URL or path to profile image)
+- `status`: String (current status of the faculty, e.g., active, retired)
+- `isDeleted`: Boolean (soft delete flag)
+- `createdAt`: Date (record creation date)
+- `updatedAt`: Date (record last update date)
+- `academicDepartment`: String (department the faculty belongs to)
+- `academicFaculty`: String (faculty they are part of)
+
+### **Admin Data Model**
+
+- `_id`: ObjectId (generated automatically)
+- `id`: String (unique ID for the admin)
+- `password`: String (hashed password)
+- `name`: String (full name of the admin)
+- `gender`: String (gender of the admin)
+- `dateOfBirth`: Date (date of birth)
+- `email`: String (email address)
+- `contactNo`: String (phone number)
+- `emergencyContactNo`: String (emergency contact number)
+- `presentAddress`: String (current address)
+- `permanentAddress`: String (permanent address)
+- `guardian`: String (name of the guardian)
+- `localGuardian`: String (name of the local guardian)
+- `profileImage`: String (URL or path to profile image)
+- `status`: String (current status of the admin, e.g., active)
+- `isDeleted`: Boolean (soft delete flag)
+- `createdAt`: Date (record creation date)
+- `updatedAt`: Date (record last update date)
+- `managementDepartment`: String (department the admin is in charge of)
+
+we need to create er digramTo help visualize and understand the relationships and data referencing ammabeding.
