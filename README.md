@@ -131,3 +131,34 @@ To avoid confusion and maintain consistency, it’s important to define the data
 - `managementDepartment`: String (department the admin is in charge of)
 
 we need to create er digramTo help visualize and understand the relationships and data referencing ammabeding.
+
+after data modaling then we need to create api endPoinst . here is a exppme:
+
+## **API Endpoints Example**
+
+Below are examples of RESTful API endpoints for the **Student** entity:
+
+### **Student Routes**:
+1. **GET /students** - Fetch all students
+2. **GET /students/:id** - Fetch student details by ID
+3. **POST /students** - Create a new student
+4. **PUT /students/:id** - Update a student's profile by ID
+5. **DELETE /students/:id** - Delete a student by ID
+
+---
+
+### **API Example for Other Entities**
+
+#### **Faculty Routes**:
+1. **GET /faculty** - Fetch all faculty members
+2. **GET /faculty/:id** - Fetch faculty details by ID
+3. **POST /faculty** - Create a new faculty member
+4. **PUT /faculty/:id** - Update faculty profile by ID
+5. **DELETE /faculty/:id** - Delete a faculty member by ID
+
+#### **Admin Routes**:
+1. **GET /admins** - Fetch all admins
+2. **GET /admins/:id** - Fetch admin details by ID
+3. **POST /admins** - Create a new admin
+4. **PUT /admins/:id** - Update admin profile by ID
+5. **DELETE /admins/:id** - Delete an admin by ID
