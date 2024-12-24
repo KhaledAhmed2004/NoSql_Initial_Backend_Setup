@@ -1,4 +1,4 @@
-# Project Folder Structure
+# Folder Structure
 
 This project follows the **Modular Pattern** to keep the codebase clean and maintainable. All modules (e.g., `user`, `auth`, `student`, etc.) are organized under a central `modules` directory. Each module contains files that serve specific purposes, ensuring a clear separation of concerns.
 
@@ -71,13 +71,17 @@ export interface User {
 Validates the incoming user data for registration, login, etc.
 
 ```typescript
-import * as Joi from 'joi';
+import { z } from "zod";
 
-export const userRegistrationSchema = Joi.object({
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-  name: Joi.string().required()
+const userValidactionSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  role: z.enum(["user", "admin"]).default("user"),
+  status: z.enum(["active", "blocked"]).default("active"),
+  isDeleted: z.boolean().default(false),
 });
+
+export const UserValidaction = { userValidactionSchema };
 ```
 
 ### user.model.ts
@@ -99,17 +103,41 @@ export const User = model('User', userSchema);
 Sets up the routes for the user-related operations.
 
 ```typescript
-import { Router } from 'express';
-import { userController } from './user.controller';
+import express from "express";
 
-const router = Router();
+const router = express.Router();
 
-router.post('/register', userController.register);
-router.post('/login', userController.login);
-router.get('/profile', userController.getProfile);
+router.post("create-student", UserController.createStudent);
 
-export default router;
+export const UserRouter = router;
 ```
+
+
+### user.controller.ts
+Handles HTTP requests related to user actions like registration, login, and profile management.
+```typescript
+import { RequestHandler } from "express";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+
+const createUser: RequestHandler = catchAsync(async (req, res) => {
+  const userData = await req?.body;
+
+  const user = await UserServices.createUserIntoDB(userData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "User registered successfully",
+    data: user,
+  });
+});
+export const UserControllers = {
+  createUser,
+};
+
+```
+
 
 ### user.service.ts
 Contains the logic for user-related operations like saving a user to the database, authenticating, etc.
@@ -138,7 +166,3 @@ When adding a new module to the project, follow the same structure as shown abov
 1. **Create a new folder** for the module inside the `modules` directory.
 2. **Define controller, service, model, validation, and route** files for the new module.
 3. **Update the central `index.ts` file** (if applicable) to include the routes for the new module.
-
-## Conclusion
-
-This modular structure ensures that each feature of the application is encapsulated within its own folder, making it easier to maintain, scale, and manage the application in the long run.
