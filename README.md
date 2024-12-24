@@ -166,10 +166,13 @@ Below are examples of RESTful API endpoints for the **Student** entity:
 Here’s a more organized version of your `README.md` structure, with explanations and a cleaner format:
 
 ---
+Here’s a more organized version of your `README.md` structure, with explanations and a cleaner format:
+
+---
 
 # Project Folder Structure
 
-This project follows the **Modular Pattern** for organizing the codebase, which keeps the application scalable and maintainable. Each module is organized into a separate folder under a central `modules` directory, ensuring a clear separation of concerns.
+This project follows the **Modular Pattern** to keep the codebase clean and maintainable. All modules (e.g., `user`, `auth`, `student`, etc.) are organized under a central `modules` directory. Each module contains files that serve specific purposes, ensuring a clear separation of concerns.
 
 ## Folder Structure Overview
 
@@ -197,10 +200,12 @@ modules/
 Each module contains the following files:
 
 1. **Controller (`*.controller.ts`)**  
-   Contains the request handlers and route logic. It is responsible for interacting with the service layer and returning the appropriate responses.
+This file handles incoming HTTP requests for the module. It acts as a middle layer between the routes and the service, delegating the business logic to the service. It is responsible for interacting with the service layer and returning the appropriate responses.
+
 
 2. **Interface (`*.interface.ts`)**  
-   Defines TypeScript interfaces for the data structures used within the module. This helps maintain type safety and ensures that the data being passed around adheres to the defined structure.
+Defines the TypeScript interfaces for data structures used in the module. It ensures consistency in data types across the module.
+
 
 3. **Validation (`*.validation.ts`)**  
    Contains the logic for validating incoming data (e.g., checking if the email is valid, password strength, etc.). This file ensures that only valid data is passed to the service layer.
@@ -211,8 +216,11 @@ Each module contains the following files:
 5. **Route (`*.route.ts`)**  
    Defines the API routes for the module. It sets up which controller methods should handle specific HTTP requests (GET, POST, PUT, DELETE, etc.).
 
+
+
 6. **Service (`*.service.ts`)**  
-   Contains the core business logic for the module. The service layer interacts with the database and provides methods that the controller layer calls.
+   Contains the core business logic for the module. The service layer interacts with the database and provides methods that the controller layer calls. It handles database operations, data processing, and other core functionalities.
+
 
 ## Example: User Module
 
