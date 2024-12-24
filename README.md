@@ -7,44 +7,53 @@ When starting a project quickly, it's important to conduct a **requirement analy
 ### 1. Authentication
 
 #### a. **Student**
+
 - Students can **login** and **logout** securely.
 - Students can **update their password**.
 
 #### b. **Faculty**
+
 - Faculty can **login** and **logout** securely.
 - Faculty can **update their password**.
 
 #### c. **Admin**
+
 - Admin can **login** and **logout** securely.
 - Admin can **update their password**.
 
 ### 2. Profile Management
 
 #### a. **Student**
+
 - Students can **manage and update** their profile securely.
 - Students can **update specific fields** in their profile.
 
 #### b. **Faculty**
+
 - Faculty can **manage and update** their profile securely.
 - Faculty can **update specific fields** in their profile.
 
 #### c. **Admin**
+
 - Admin can **manage and update** user profiles securely.
 - Admin can **update specific fields** in any profile.
 
 ### 3. Academic Process
 
 #### a. **Student**
+
 - Students can **enroll** in courses for a specific semester.
 - Students can **view their class schedule**.
 - Students can **see their grades**.
 - Students can **view the notice board and events**.
 
 #### b. **Faculty**
+
 - Faculty can **manage student grades**.
 - Faculty can **access student personal and academic information**.
 
 #### c. **Admin**
+
 - Admin can **manage multiple processes**:
   - **Semester** management
   - **Course** management
@@ -56,14 +65,17 @@ When starting a project quickly, it's important to conduct a **requirement analy
 ### 4. User Management
 
 #### a. **Admin**
+
 - Admin can **manage multiple user accounts**.
 - Admin can **block or unblock users**.
 - Admin can **change user passwords**.
 
 # data modle
+
 To avoid confusion and maintain consistency, it’s important to define the data structure at the start.
 
- give a example:
+give a example:
+
 ### **Student Data Model**
 
 - `_id`: ObjectId (generated automatically)
@@ -139,6 +151,7 @@ after data modaling then we need to create api endPoinst . here is a exppme:
 Below are examples of RESTful API endpoints for the **Student** entity:
 
 ### **Student Routes**:
+
 1. **GET /students** - Fetch all students
 2. **GET /students/:id** - Fetch student details by ID
 3. **POST /students** - Create a new student
@@ -150,6 +163,7 @@ Below are examples of RESTful API endpoints for the **Student** entity:
 ### **API Example for Other Entities**
 
 #### **Faculty Routes**:
+
 1. **GET /faculty** - Fetch all faculty members
 2. **GET /faculty/:id** - Fetch faculty details by ID
 3. **POST /faculty** - Create a new faculty member
@@ -157,6 +171,7 @@ Below are examples of RESTful API endpoints for the **Student** entity:
 5. **DELETE /faculty/:id** - Delete a faculty member by ID
 
 #### **Admin Routes**:
+
 1. **GET /admins** - Fetch all admins
 2. **GET /admins/:id** - Fetch admin details by ID
 3. **POST /admins** - Create a new admin
@@ -166,6 +181,7 @@ Below are examples of RESTful API endpoints for the **Student** entity:
 Here’s a more organized version of your `README.md` structure, with explanations and a cleaner format:
 
 ---
+
 Here’s a more organized version of your `README.md` structure, with explanations and a cleaner format:
 
 ---
@@ -200,12 +216,10 @@ modules/
 Each module contains the following files:
 
 1. **Controller (`*.controller.ts`)**  
-This file handles incoming HTTP requests for the module. It acts as a middle layer between the routes and the service, delegating the business logic to the service. It is responsible for interacting with the service layer and returning the appropriate responses.
-
+   This file handles incoming HTTP requests for the module. It acts as a middle layer between the routes and the service, delegating the business logic to the service. It is responsible for interacting with the service layer and returning the appropriate responses.
 
 2. **Interface (`*.interface.ts`)**  
-Defines the TypeScript interfaces for data structures used in the module. It ensures consistency in data types across the module.
-
+   Defines the TypeScript interfaces for data structures used in the module. It ensures consistency in data types across the module.
 
 3. **Validation (`*.validation.ts`)**  
    Contains the logic for validating incoming data (e.g., checking if the email is valid, password strength, etc.). This file ensures that only valid data is passed to the service layer.
@@ -216,18 +230,17 @@ Defines the TypeScript interfaces for data structures used in the module. It ens
 5. **Route (`*.route.ts`)**  
    Defines the API routes for the module. It sets up which controller methods should handle specific HTTP requests (GET, POST, PUT, DELETE, etc.).
 
-
-
 6. **Service (`*.service.ts`)**  
    Contains the core business logic for the module. The service layer interacts with the database and provides methods that the controller layer calls. It handles database operations, data processing, and other core functionalities.
-
 
 ## Example: User Module
 
 ### user.controller.ts
+
 Handles HTTP requests related to user actions like registration, login, and profile management.
 
 ### user.interface.ts
+
 Defines the shape of user data, such as:
 
 ```typescript
@@ -240,23 +253,25 @@ export interface User {
 ```
 
 ### user.validation.ts
+
 Validates the incoming user data for registration, login, etc.
 
 ```typescript
-import * as Joi from 'joi';
+import * as Joi from "joi";
 
 export const userRegistrationSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
-  name: Joi.string().required()
+  name: Joi.string().required(),
 });
 ```
 
 ### user.model.ts
+
 Defines the user schema for interacting with the database (e.g., MongoDB, SQL).
 
 ```typescript
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 const userSchema = new Schema({
   email: { type: String, required: true },
@@ -264,30 +279,32 @@ const userSchema = new Schema({
   name: { type: String, required: true },
 });
 
-export const User = model('User', userSchema);
+export const User = model("User", userSchema);
 ```
 
 ### user.route.ts
+
 Sets up the routes for the user-related operations.
 
 ```typescript
-import { Router } from 'express';
-import { userController } from './user.controller';
+import { Router } from "express";
+import { userController } from "./user.controller";
 
 const router = Router();
 
-router.post('/register', userController.register);
-router.post('/login', userController.login);
-router.get('/profile', userController.getProfile);
+router.post("/register", userController.register);
+router.post("/login", userController.login);
+router.get("/profile", userController.getProfile);
 
 export default router;
 ```
 
 ### user.service.ts
+
 Contains the logic for user-related operations like saving a user to the database, authenticating, etc.
 
 ```typescript
-import { User } from './user.model';
+import { User } from "./user.model";
 
 export class UserService {
   async register(userData: any) {
