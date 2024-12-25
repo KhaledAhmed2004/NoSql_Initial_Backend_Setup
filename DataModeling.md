@@ -6,35 +6,193 @@ In MongoDB, there are two common methods for modeling data: **Embedding** and **
 
 ## **1. Embedding**
 
-Embedding stores related data directly within a single document. This method works well when data is frequently retrieved together, and data consistency is important.
+Embedding in Mongoose allows you to store related data as subdocuments within a parent document. This method improves performance for operations involving nested data, as everything is stored in a single document.
 
-### **Pros:**
-- **Faster Reading**: All related data is stored together, so no additional queries are required to fetch related data.
-- **Single Query Updates**: Updating all data in one place is possible with a single query.
-- **Less Expensive Lookup**: No need for additional lookups to retrieve data.
+### **Scenario**: Blog Application with Embedded Comments
 
-### **Cons:**
-- **Slow Writing and Updating**: Writing or updating large documents can be slow since the entire document must be rewritten.
-- **Limited Size**: Documents are capped at 16MB in size, which can limit the amount of embedded data.
-- **Data Duplication**: If the same data appears in multiple documents, there may be unnecessary duplication.
+Imagine a blog application where each blog post has comments. Instead of storing comments in a separate collection, you can embed them within the blog post document.
 
+---
+
+### **Example Code**:
+
+#### Step 1: Define the Comment Schema (TypeScript)
+
+```typescript
+// Define the Comment schema in TypeScript
+type IComment = {
+  username: string;
+  text: string;
+  createdAt: Date;
+  postId: mongoose.Types.ObjectId; // Reference to the BlogPost
+}
+
+```
+
+#### Step 2: Define the Embedded Schema (Subdocument)
+In Mongoose, a subdocument is defined as a schema that is embedded within another schema.
+```typescript
+// Define the Comment schema (subdocument)
+const commentSchema = new Schema({
+  username: { type: String, required: true },
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+```
+
+#### Step 3: Define the Parent Schema
+Here, we embed the commentSchema as an array of comments in the blog post schema.
+```typescript
+// Define the BlogPost schema
+const blogPostSchema = new Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  author: { type: String, required: true },
+  comments: [commentSchema] // Embedding the comments schema
+});
+
+// Create the BlogPost model
+const BlogPost = mongoose.model('BlogPost', blogPostSchema);
+```
+
+### Output Example:
+After embedding, when querying the blog posts, the resulting document will look like this:
+
+```json
+{
+  "_id": "64f8325fc2a9f5411e8b9e2b",
+  "title": "Understanding Mongoose Embedding",
+  "content": "This post explains how to use embedding in Mongoose.",
+  "author": "John Doe",
+  "comments": [
+    {
+      "_id": "64f8325fc2a9f5411e8b9e2c",
+      "username": "Jane",
+      "text": "Great article!",
+      "createdAt": "2024-09-06T12:34:56.789Z"
+    },
+    {
+      "_id": "64f8325fc2a9f5411e8b9e2d",
+      "username": "Tom",
+      "text": "Very helpful, thanks!",
+      "createdAt": "2024-09-06T12:35:12.345Z"
+    }
+  ]
+}
+```
 ---
 
 ## **2. Referencing**
 
-Referencing stores only the IDs (usually `ObjectIds`) of related documents within a document, pointing to other collections. This method works well when data grows independently and is frequently updated.
+Referencing in Mongoose allows you to store relationships between documents in different collections by saving the IDs (usually `ObjectIds`) of related documents within a document. This method helps you keep documents smaller and more flexible, while still maintaining relationships between them, similar to how foreign keys work in relational databases.
 
-### **Pros:**
-- **Fast Writing and Updating**: Writing and updating documents is fast as only references need to be updated, not the entire document.
-- **No Data Duplication**: Data is stored once, reducing redundancy.
-- **Scalable**: Works well for large data sets as there are no size limitations for individual documents.
+### **Scenario**: Blog Application with Referenced Comments
 
-### **Cons:**
-- **Slow Reading**: Requires additional queries to look up and fetch referenced data, which can impact performance.
-- **Expensive Lookup**: Lookups to retrieve related data can be more expensive as they require separate queries.
-- **Complex Queries**: More complex queries and joins may be needed to fetch related data.
+Instead of embedding comments directly into the blog post, you can store comments in a separate collection and reference them in the blog post. This method can be beneficial when comments grow large or are shared across multiple blog posts.
 
 ---
+
+### **Example Code**:
+
+#### **Step 1: Define the Comment Schema (TypeScript)**
+
+```typescript
+// Define the Comment schema in TypeScript
+type IComment = {
+  username: string;
+  text: string;
+  createdAt: Date;
+  postId: mongoose.Types.ObjectId; // Reference to the BlogPost
+}
+```
+
+#### **Step 2: Define the Comment Schema (Referenced)**
+
+In this step, we define the `Comment` schema, which includes a reference to the `BlogPost` using `ObjectId`.
+
+```typescript
+const { Schema } = mongoose;
+
+// Define the Comment schema
+const commentSchema = new Schema({
+  username: { type: String, required: true },
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  postId: { type: Schema.Types.ObjectId, ref: 'BlogPost' } // Reference to BlogPost
+});
+
+// Create the Comment model
+const Comment = mongoose.model('Comment', commentSchema);
+```
+
+#### **Step 3: Define the BlogPost Schema (Parent Document)**
+
+The `BlogPost` schema contains an array of `ObjectId` references pointing to `Comment` documents.
+
+```typescript
+// Define the BlogPost schema
+const blogPostSchema = new Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  author: { type: String, required: true },
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }] // Array of references to Comment
+});
+
+// Create the BlogPost model
+const BlogPost = mongoose.model('BlogPost', blogPostSchema);
+```
+
+
+
+#### **Step 4: Querying Referenced Data**
+
+When querying blog posts, use the `.populate()` method to replace the `comments` field with the actual `Comment` documents.
+
+```typescript
+async function getBlogPostWithComments() {
+  const blogPosts = await BlogPost.find()
+    .populate('comments') // Populates the comments field with the actual Comment documents
+    .exec();
+  console.log('Blog Posts with Populated Comments:', blogPosts);
+}
+
+getBlogPostWithComments().catch(console.error);
+```
+
+---
+
+#### **Output Example**
+
+After running the query, the populated blog post document will look like this:
+
+```json
+{
+  "_id": "64f8345dc2a9f5411e8b9e2e",
+  "title": "Understanding Mongoose Referencing",
+  "content": "This post explains how to use referencing in Mongoose.",
+  "author": "John Doe",
+  "comments": [
+    {
+      "_id": "64f8346dc2a9f5411e8b9e2f",
+      "username": "Jane",
+      "text": "Great article!",
+      "createdAt": "2024-09-06T12:45:34.123Z",
+      "postId": "64f8345dc2a9f5411e8b9e2e"
+    },
+    {
+      "_id": "64f8347ec2a9f5411e8b9e30",
+      "username": "Tom",
+      "text": "Very helpful, thanks!",
+      "createdAt": "2024-09-06T12:46:10.456Z",
+      "postId": "64f8345dc2a9f5411e8b9e2e"
+    }
+  ]
+}
+```
+
+### Considerations:
+- Use referencing when related data can grow large or is shared among multiple documents.
+- Requires additional queries (e.g., `.populate()`) to fetch related data, which can impact performance compared to embedding.
 
 ## **Comparison Table**
 
@@ -51,21 +209,6 @@ Referencing stores only the IDs (usually `ObjectIds`) of related documents withi
 | **Lookup**             | No lookup needed since data is embedded directly in the document. | Requires lookup to retrieve data from the referenced document. |
 | **Use Case**           | Best for smaller, self-contained data or when fast access is needed. | Best for larger, frequently updated data or when data needs to be shared between multiple documents. |
 
----
-
-## **Conclusion**
-
-Both **embedding** and **referencing** have their advantages, and the choice between them depends on your application's needs:
-
-- **Embedding** is suitable for:
-  - **Faster reading** and **simpler use cases**.
-  - Small to medium-sized data.
-  
-- **Referencing** is ideal for:
-  - **Scalable, large applications**.
-  - Frequent updates and shared data.
-
----
 
 ## **Data Relationships in ER Diagram**
 
@@ -84,7 +227,3 @@ In an **ER diagram**, this means for each **student**, there is exactly one **pr
   - One **admin** can manage many **faculty members**.
 
 In an **ER diagram**, this means one **teacher** can be linked to many **students**, but each **student** has only one **teacher**. Similarly, one **admin** manages many **faculty members**, but each **faculty member** is managed by only one **admin**.
-
----
-
-Would you like to see an ER diagram example or need further clarification?
