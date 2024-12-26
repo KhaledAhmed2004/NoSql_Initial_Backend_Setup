@@ -9,6 +9,7 @@ Mongoose middleware functions are executed during specific stages of a Mongoose 
 
 1. **Pre Middleware**
    - Runs **before** an action (e.g., before saving, updating, or deleting a document).
+ 
  **Use Case**: Validating email or modifying data before saving.
    **Example: Pre-save Middleware**
 
