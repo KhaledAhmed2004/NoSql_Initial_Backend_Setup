@@ -42,9 +42,11 @@ userSchema.post('save', function (doc, next) {
 });
 ```
 
+
+
 ## **Common Use Cases for Mongoose Middleware**
 
-### **1. Hashing Passwords**
+### **1. Hashing Passwords `pre` hook**
 Securely hash user passwords before saving them to the database.
 
 #### Example: Password Hashing Middleware
@@ -58,18 +60,25 @@ userSchema.pre('save', async function (next) {
   next();
 });
 ```
+## 2.**Masking Passwords by `post` hook**
 
----
+The **post-find hook** runs after a query using `find` is executed. It’s useful for modifying or processing the retrieved data.
 
-### **2. Populating Fields**
-Automatically populate reference fields after querying documents.
-
-#### Example: Post-find Middleware
+#### Example: Masking Passwords
 ```javascript
-userSchema.post('find', async function (docs) {
-  for (const doc of docs) {
-    await doc.populate('profile'); // Populate 'profile' reference
-  }
+userSchema.post('find', function (docs, next) {
+  docs.forEach(doc => {
+    doc.password = undefined; // Hide the password
+  });
+  console.log('Post-find middleware executed');
+  next();
+});
+
+const User = mongoose.model('User', userSchema);
+
+// Usage example
+User.find({}).then(users => {
+  console.log(users); // Password will be masked
 });
 ```
 
@@ -98,29 +107,7 @@ userSchema.pre('save', function (next) {
 
 ---
 
-## **Post-find Middleware Example**
 
-The **post-find hook** runs after a query using `find` is executed. It’s useful for modifying or processing the retrieved data.
-
-#### Example: Masking Passwords
-```javascript
-userSchema.post('find', function (docs, next) {
-  docs.forEach(doc => {
-    doc.password = undefined; // Hide the password
-  });
-  console.log('Post-find middleware executed');
-  next();
-});
-
-const User = mongoose.model('User', userSchema);
-
-// Usage example
-User.find({}).then(users => {
-  console.log(users); // Password will be masked
-});
-```
-
----
 
 ## **Best Practices**
 
@@ -143,4 +130,3 @@ User.find({}).then(users => {
 | Pre Middleware       | Before an action         | Validation, password hashing         | `save`, `update`, `remove`|
 | Post Middleware      | After an action          | Logging, notifications, data cleanup | `save`, `update`, `remove`|
 | Error Middleware     | After an error occurs    | Error logging, transforming messages | `save`, `update`, `remove`|
-
