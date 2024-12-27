@@ -108,22 +108,6 @@ userSchema.pre('save', function (next) {
 ---
 
 
-
-## **Best Practices**
-
-1. **Always Call `next()`**  
-   Whether in `pre` or `post` hooks, calling `next()` ensures the middleware doesn’t block the lifecycle.
-
-2. **Use Error Middleware for Debugging**  
-   Add error middleware to log and handle errors efficiently.
-
-3. **Avoid Heavy Operations**  
-   Keep middleware lightweight to avoid slowing down database operations.
-
-4. **Use Asynchronous Middleware for Async Tasks**  
-   For operations like hashing passwords or populating fields, always use `async/await` for cleaner and error-free code.
-
-
 ### Summary Table
 | **Middleware Type** | **Execution Stage**       | **Common Use Cases**                | **Example Methods**       |
 |----------------------|---------------------------|--------------------------------------|---------------------------|
