@@ -118,7 +118,7 @@ app.get('/user', catchAsync(async (req, res, next) => {
 
 With `catchAsync`, the error handling is streamlined. You don’t need to manually wrap each handler in a `try...catch`, making your code cleaner and easier to maintain.
 
-### Promises in JavaScript
+## Promises in JavaScript
 
 A **Promise** in JavaScript is like a "future delivery service." It allows you to handle operations that take time (like fetching data from a server) in a cleaner and more organized way. Promises act as a placeholder for a value that isn’t available yet but will be at some point in the future.
 
