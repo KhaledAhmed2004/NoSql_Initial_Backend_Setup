@@ -145,6 +145,56 @@ User.find({}).then(users => {
 });
 ```
 
+### **3. Document Existence Check (`pre` hook)**
+Ensure a document exists before performing operations like `findOneAndUpdate`. This helps to avoid updating non-existent documents.
+
+#### Example: Pre-Hook Middleware for Document Existence Check
+```typescript
+import mongoose from "mongoose";
+
+const yourSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  age: { type: Number, required: true },
+});
+
+// Pre-hook to check if the document exists before update
+yourSchema.pre('findOneAndUpdate', async function (next) {
+  try {
+    // Extract the query used to find the document
+    const query = this.getQuery();
+
+    // Check if a document exists with the given query
+    const document = await this.model.findOne(query);
+
+    if (!document) {
+      // If no document is found, create an error and pass it to the next middleware
+      const error = new Error("Document not found");
+      error.statusCode = 404; // Optional: Add status code for better error handling
+      return next(error);
+    }
+
+    // If the document exists, proceed with the update
+    next();
+  } catch (error) {
+    // Pass any unexpected errors to the next middleware
+    next(error);
+  }
+});
+
+const YourModel = mongoose.model("YourModel", yourSchema);
+
+export default YourModel;
+```
+
+**Key Concepts and Explanation:**
+- **Middleware Hook**: `pre` hook executes before the `findOneAndUpdate` method to ensure that the document exists.
+- **Extracting Query**: `this.getQuery()` retrieves the conditions used for finding the document.
+- **Existence Check**: `await this.model.findOne(query)` checks for the existence of the document.
+- **Error Handling**: If no document is found, an error with a `404` status code is passed to `next()`, preventing the update operation.
+- **Allow Update**: If the document exists, the update proceeds by calling `next()`.
+
+
 ---
 
 ## **Summary Table**
