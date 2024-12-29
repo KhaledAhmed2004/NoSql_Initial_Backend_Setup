@@ -190,9 +190,161 @@ After running the query, the populated blog post document will look like this:
 }
 ```
 
+
+
 ### Considerations:
 - Use referencing when related data can grow large or is shared among multiple documents.
 - Requires additional queries (e.g., `.populate()`) to fetch related data, which can impact performance compared to embedding.
+
+
+### Nested Populate in Mongoose
+
+When you use referencing in MongoDB with Mongoose, sometimes you'll want to populate data from multiple levels of relationships. Mongoose allows you to use **nested populate**, which lets you populate a reference that itself contains another reference. This is useful when you have a more complex schema structure with multiple levels of references.
+
+Here’s how you can implement and use **nested populate** in Mongoose:
+
+---
+
+### **Scenario: Blog Application with Author and Commenter**
+
+Imagine a blog application where:
+- A `BlogPost` contains a reference to an `Author`.
+- Each `BlogPost` also has comments, and each `Comment` contains a reference to a `Commenter`.
+
+You want to fetch a blog post, and not only load the comments but also populate the `Commenter` information within each comment and the `Author` information for the post itself.
+
+---
+
+### **Example Code for Nested Populate:**
+
+#### Step 1: Define the Author Schema  (Parent Document)
+```typescript
+const { Schema, model, Types } = mongoose;
+
+// Define the Author schema
+const authorSchema = new Schema({
+  name: { type: String, required: true },
+  bio: { type: String }
+});
+
+// Create the Author model
+const Author = model('Author', authorSchema);
+```
+
+#### Step 2: Define the Commenter Schema  (Referenced)
+```typescript
+// Define the Commenter schema
+const commenterSchema = new Schema({
+  username: { type: String, required: true },
+  email: { type: String, required: true }
+});
+
+// Create the Commenter model
+const Commenter = model('Commenter', commenterSchema);
+```
+
+#### Step 3: Define the Comment Schema 
+The `Comment` will reference the `Commenter` model.
+```typescript
+// Define the Comment schema
+const commentSchema = new Schema({
+  text: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+  commenter: { type: Types.ObjectId, ref: 'Commenter' },  // Reference to Commenter
+  postId: { type: Types.ObjectId, ref: 'BlogPost' } // Reference to BlogPost
+});
+
+// Create the Comment model
+const Comment = model('Comment', commentSchema);
+```
+
+#### Step 4: Define the BlogPost Schema
+The `BlogPost` will reference the `Author` model and store an array of `comments` that reference the `Comment` model.
+```typescript
+// Define the BlogPost schema
+const blogPostSchema = new Schema({
+  title: { type: String, required: true },
+  content: { type: String, required: true },
+  author: { type: Types.ObjectId, ref: 'Author' }, // Reference to Author
+  comments: [{ type: Types.ObjectId, ref: 'Comment' }] // Array of references to Comment
+});
+
+// Create the BlogPost model
+const BlogPost = model('BlogPost', blogPostSchema);
+```
+
+#### Step 5: Query with Nested Populate
+
+Now, you can query a blog post and use **nested populate** to load both the `author` of the blog post and the `commenter` of each comment:
+
+```typescript
+async function getBlogPostWithCommentsAndAuthor() {
+  const blogPosts = await BlogPost.find()
+    .populate({
+      path: 'author',  // Populate the Author
+      select: 'name bio'  // Only include name and bio fields
+    })
+    .populate({
+      path: 'comments',  // Populate the comments
+      populate: {  // Nested populate for each comment's commenter
+        path: 'commenter',  // Populate the Commenter's details
+        select: 'username email'  // Only include username and email fields
+      }
+    })
+    .exec();
+
+  console.log('Blog Post with Author and Comments:', blogPosts);
+}
+
+getBlogPostWithCommentsAndAuthor().catch(console.error);
+```
+
+### **Explanation of Nested Populate:**
+- The first `populate()` call fetches the `author` of the `BlogPost` and includes only the `name` and `bio` fields.
+- The second `populate()` call fetches the `comments` array, and within that, it uses a nested `populate` to retrieve the `commenter` details. In this case, only the `username` and `email` fields of each `Commenter` are included.
+  
+### **Output Example:**
+After running the query, the populated blog post document will look like this:
+
+```json
+{
+  "_id": "64f8345dc2a9f5411e8b9e2e",
+  "title": "Understanding Mongoose Referencing",
+  "content": "This post explains how to use referencing in Mongoose.",
+  "author": {
+    "_id": "64f8345dc2a9f5411e8b9e2f",
+    "name": "John Doe",
+    "bio": "Software Developer"
+  },
+  "comments": [
+    {
+      "_id": "64f8346dc2a9f5411e8b9e2f",
+      "text": "Great article!",
+      "createdAt": "2024-09-06T12:45:34.123Z",
+      "commenter": {
+        "_id": "64f8346dc2a9f5411e8b9e30",
+        "username": "Jane",
+        "email": "jane@example.com"
+      },
+      "postId": "64f8345dc2a9f5411e8b9e2e"
+    },
+    {
+      "_id": "64f8347ec2a9f5411e8b9e30",
+      "text": "Very helpful, thanks!",
+      "createdAt": "2024-09-06T12:46:10.456Z",
+      "commenter": {
+        "_id": "64f8347ec2a9f5411e8b9e31",
+        "username": "Tom",
+        "email": "tom@example.com"
+      },
+      "postId": "64f8345dc2a9f5411e8b9e2e"
+    }
+  ]
+}
+```
+
+
+
 
 ## **Comparison Table**
 
