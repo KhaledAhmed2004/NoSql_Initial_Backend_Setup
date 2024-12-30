@@ -469,3 +469,48 @@ The `handleDuplicateError` function processes MongoDB errors caused by duplicate
 - **`errorSources`**: Details about the duplicate key (e.g., `"test@example.com already exists"`).
 
 
+
+
+
+
+
+
+### 1. **Unhandled Promise Rejection**
+
+When a promise is rejected and there is no `.catch()` handler attached to it, the `unhandledRejection` event is triggered. Instead of allowing the application to crash, the code ensures a graceful shutdown. Here’s how it works:
+
+```js
+process.on("unhandledRejection", () => {
+  console.error("Unhandled promise rejection detected, shutting down...");
+
+  if (server) {
+    server.close(() => process.exit(1));  // Gracefully close the server before exiting
+  } else {
+    process.exit(1);  // Exit immediately if the server is not running
+  }
+});
+```
+
+- **Explanation**:
+  - **Graceful shutdown**: The server is closed first to ensure that any ongoing requests are handled before the process exits.
+  - **Exit process**: After shutting down the server, the process exits with status code `1`, indicating an error.
+
+This approach prevents sudden termination of the application, ensuring that resources like open connections are properly closed before exiting.
+
+### 2. **Uncaught Exception**
+
+The `uncaughtException` event is triggered when an exception occurs and is not caught by any `try-catch` block. In this case, the application will exit immediately to prevent the app from running in an unstable state.
+
+```js
+process.on("uncaughtException", () => {
+  console.error("Uncaught exception detected, shutting down...");
+  process.exit(1);  // Exit immediately
+});
+```
+
+- **Explanation**:
+  - The application logs the error message for diagnostic purposes.
+  - The process is immediately exited with status code `1`.
+
+This ensures that the application doesn't continue running after an uncaught error, which might cause further issues.
+
