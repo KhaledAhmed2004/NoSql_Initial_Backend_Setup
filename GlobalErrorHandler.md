@@ -1,3 +1,52 @@
+# Types of Errors in Applications  
+
+#### 1. **Operational Errors**  
+   - **Definition**: Errors that occur due to external factors or predictable issues in the system's operation.  
+   - **Examples**:  
+     - Database connection failure.  
+     - Invalid user input.  
+     - Network timeouts.  
+   - **Where They Occur**:  
+     - Handled within the application (e.g., Express error-handling middleware).  
+
+---
+
+#### 2. **Programmatic Errors**  
+   - **Definition**: Errors caused by mistakes in the code written by the developer.  
+   - **Examples**:  
+     - Undefined variable access.  
+     - Syntax errors.  
+     - Logic errors.  
+   - **Where They Occur**:  
+     - Handled within the application (e.g., using `try-catch` blocks).  
+
+---
+
+#### 3. **Uncaught Exceptions**  
+   - **Definition**: Errors that occur in synchronous code but are not wrapped in error-handling mechanisms.  
+   - **Examples**:  
+     - Accessing a property on `undefined`.  
+     - Throwing an error that isn't caught.  
+   - **Where They Occur**:  
+     - Inside or outside the application.  
+   - **How to Handle**:  
+     - Use `process.on('uncaughtException', callback)` to handle globally.  
+
+#### 4. **Unhandled Rejections**  
+   - **Definition**: Errors that occur in asynchronous code when a `Promise` is rejected but not handled with `.catch()`.  
+   - **Examples**:  
+     - Forgetting to handle a rejected `Promise`.  
+     - API call failing without a `catch` block.  
+   - **Where They Occur**:  
+     - Inside or outside the application.  
+   - **How to Handle**:  
+     - Use `process.on('unhandledRejection', callback)` to handle globally.  
+
+
+### Key Points:  
+- **Operational and Programmatic Errors**: Typically occur **within the application** and are handled using tools like middleware or error-handling mechanisms.  
+- **Uncaught Exceptions and Unhandled Rejections**: Can occur **inside or outside the application** and require global error-handling mechanisms.  
+
 # Understanding Global Error Handler in Express
 
 In an **Express** application, a **global error handler** is a special middleware function designed to handle all errors that occur during the execution of your application. It ensures that all unhandled errors are captured in a single place, allowing you to:
