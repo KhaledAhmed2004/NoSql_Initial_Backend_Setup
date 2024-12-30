@@ -40,53 +40,82 @@ updateUser();
 
 ---
 
-### 2. **Non-Primitive Fields**
-Non-primitive fields can be arrays, objects, or embedded documents, and they require different update operators.
+### 2. **Non-Primitive Fields in MongoDB Updates**
 
-#### Common Non-Primitive Data Types:
+When updating non-primitive fields in MongoDB, it's important to only send the specific fields that need to be updated. Sending the entire document can lead to unnecessary network overhead and increase bandwidth usage. By sending only the fields that need updating, you optimize performance.
+
+#### **Common Non-Primitive Data Types:**
 - **Arrays**: `["apple", "banana", "cherry"]`
 - **Objects**: `{ name: "John", age: 30 }`
-- **Embedded Documents**: `{ address: { street: "Main St", city: "New York" } }`
 
-### 2.1. **Updating Non-Primitive Fields**
-To update non-primitive fields like arrays and embedded documents, you can use specific update operators such as `$push` or `$set`.
+### 2.1. **Goal: Transform Nested Objects for Non-Primitive Field Updates**
 
-
-
-The front-end sends a JSON object like this:
-
+When the front-end sends a JSON object like this:
 ```json
 {
-  "name": "John Doe",
-  "email": "john@example.com",
-  "age": 30
+  "name": {
+    "lastName": "Nayeem"
+  }
 }
 ```
 
-
-
-#### Example: Updating an Array (Non-Primitive Field)
-```js
-const mongoose = require('mongoose');
-
-const postSchema = new mongoose.Schema({
-  title: String,
-  comments: [{ user: String, comment: String }]
-});
-
-const Post = mongoose.model('Post', postSchema);
-
-async function updatePost() {
-  const result = await Post.updateOne(
-    { title: 'Post Title' },  // Filter
-    { $push: { comments: { user: 'John', comment: 'Great post!' } } }  // Add comment to array
-  );
-  console.log(result);
+We want to transform it into a format suitable for MongoDB, like:
+```json
+{
+  "name.lastName": "Nayeem"
 }
-
-updatePost();
 ```
-- **Explanation**: The `$push` operator adds a new comment to the `comments` array in the `Post` document.
+
+### 2.2. **Steps to Transform Nested Data**
+
+To achieve this, we need to flatten nested fields into a single string key using the dot notation. The process involves:
+1. **Destructuring** the payload to extract nested fields.
+2. **Iterating** over the nested fields and building the correct path for the update.
+3. **Constructing** an update object that MongoDB can use.
+
+### 2.3. **Service Code to Update Non-Primitive Fields**
+
+Here’s an updated version of the service code that handles nested fields and transforms them accordingly:
+
+```ts
+const update = async (id: string, payload: Partial<TUser>) => {
+  // Destructure the payload to separate nested fields and remaining data
+  const { name, ...remainingData } = payload;
+
+  // Create an object to hold the final update data
+  const modifiedUpdateData: Record<string, unknown> = { ...remainingData };
+
+  // Handle nested 'name' object, if present
+  if (name && Object.keys(name).length > 0) {
+    for (const [key, value] of Object.entries(name)) {
+      // Dynamically build the key for the nested field (e.g., 'name.lastName')
+      modifiedUpdateData[`name.${key}`] = value;
+    }
+  }
+
+  // Perform the update using the `findOneAndUpdate` method
+  const result = await Student.findOneAndUpdate({ id }, modifiedUpdateData, { new: true });
+
+  return result;
+};
+```
+
+### 2.4. **Explanation of the Code:**
+
+1. **Destructuring Payload**: 
+   - The payload is destructured into `name` (which could be a nested object) and `remainingData` (other fields).
+   
+2. **Creating `modifiedUpdateData`**: 
+   - We initialize an empty object, `modifiedUpdateData`, with the remaining fields from the payload. This will hold the updated fields.
+
+3. **Flattening Nested Fields**:
+   - If the `name` field contains nested properties (like `lastName`), we loop through its entries using `Object.entries(name)`.
+   - For each key (e.g., `lastName`), we create a new key `name.<key>` (e.g., `name.lastName`) and assign the corresponding value.
+
+4. **Update MongoDB Document**:
+   - Using `findOneAndUpdate`, we pass `modifiedUpdateData` as the update payload.
+   - The `new: true` option ensures that the updated document is returned.
+
 
 ### 3. **Common Mongoose Update Methods**
 
