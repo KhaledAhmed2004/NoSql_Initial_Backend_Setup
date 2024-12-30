@@ -304,3 +304,168 @@ export default globalErrorHandler;
 
 4. **Error Response**:
    - A structured JSON response is sent back to the client with relevant details.
+  
+# utility of globel error handaler
+Here is a more organized version of the provided explanation:
+
+---
+
+## Global Error Handlers
+
+### 1. `handleZodError` (Zod Validation Errors)
+#### **Purpose**
+The `handleZodError` function processes errors thrown by Zod validation and formats them into a readable and structured format for the application.
+
+#### **Code Breakdown**
+
+1. **Input**: Takes in a `ZodError` object containing validation issues from Zod.
+2. **Mapping Zod Issues**: 
+   ```ts
+   const errorSources: TErrorSources = error.issues.map((issue: ZodIssue) => {
+     return {
+       path: issue?.path[issue.path.length - 1], // Last index of issue path
+       message: issue?.message, // Error message
+     };
+   });
+   ```
+   - **`path`**: Extracts the last element of the path array to identify the field where the error occurred.
+   - **`message`**: The error message explaining what went wrong.
+
+3. **Status Code**: 
+   ```ts
+   const statusCode = 400; // Bad Request
+   ```
+
+4. **Returning Response**:
+   ```ts
+   return {
+     statusCode,
+     message: "Validation Error",
+     errorSources,
+   };
+   ```
+
+#### **Response Structure**
+- **`statusCode`**: `400` (Bad Request)
+- **`message`**: "Validation Error"
+- **`errorSources`**: Array of error details (field and error message).
+
+---
+
+### 2. `handleValidationError` (Mongoose Validation Errors)
+#### **Purpose**
+The `handleValidationError` function handles validation errors thrown by Mongoose when a document fails schema validation.
+
+#### **Code Breakdown**
+
+1. **Input**: Takes in a `ValidationError` object from Mongoose.
+2. **Mapping Validation Errors**: 
+   ```ts
+   const errorSources: TErrorSources = Object.values(error.errors).map(
+     (val: mongoose.Error.ValidatorError | mongoose.Error.CastError) => {
+       return {
+         path: val?.path, // Error field path
+         message: val?.message, // Error message
+       };
+     }
+   );
+   ```
+   - **`path`**: The field that caused the error.
+   - **`message`**: A description of the validation error.
+
+3. **Status Code**: 
+   ```ts
+   const statusCode = 400; // Bad Request
+   ```
+
+4. **Returning Response**:
+   ```ts
+   return {
+     statusCode,
+     message: "Validation Error",
+     errorSources,
+   };
+   ```
+
+#### **Response Structure**
+- **`statusCode`**: `400` (Bad Request)
+- **`message`**: "Validation Error"
+- **`errorSources`**: Array of error details.
+
+---
+
+### 3. `handleCastError` (Mongoose Cast Errors)
+#### **Purpose**
+The `handleCastError` function handles MongoDB `CastError` instances, which occur when Mongoose fails to cast a value to a specific type (e.g., invalid `ObjectId`).
+
+#### **Code Breakdown**
+
+1. **Input**: Takes in a `mongoose.Error.CastError`.
+2. **Extracting Error Details**: 
+   ```ts
+   const errorSources: TErrorSources = [
+     { path: error.path, message: error.message }, // Provide error path and message
+   ];
+   ```
+
+3. **Status Code**: 
+   ```ts
+   const statusCode = 400; // Bad Request
+   ```
+
+4. **Returning Response**:
+   ```ts
+   return {
+     statusCode,
+     message: "Invalid ID",
+     errorSources,
+   };
+   ```
+
+#### **Response Structure**
+- **`statusCode`**: `400` (Bad Request)
+- **`message`**: "Invalid ID"
+- **`errorSources`**: Array with details about the casting error.
+
+---
+
+### 4. `handleDuplicateError` (MongoDB Duplicate Key Errors)
+#### **Purpose**
+The `handleDuplicateError` function processes MongoDB errors caused by duplicate key violations, such as attempting to insert a document with an existing unique value (e.g., duplicate email).
+
+#### **Code Breakdown**
+
+1. **Input**: Takes in a generic `error` object containing the duplicate key error message.
+2. **Extracting the Duplicate Value**: 
+   ```ts
+   const match = error.message.match(/"([^"]*)"/);
+   const extractedMessage = match && match[1];
+   ```
+
+3. **Constructing Error Source**:
+   ```ts
+   const errorSources: TErrorSources = [
+     { path: "", message: `${extractedMessage} already exists` },
+   ];
+   ```
+
+4. **Status Code**: 
+   ```ts
+   const statusCode = 400; // Bad Request
+   ```
+
+5. **Returning Response**:
+   ```ts
+   return {
+     statusCode,
+     message: "Duplicate Key Error",
+     errorSources,
+   };
+   ```
+
+#### **Response Structure**
+- **`statusCode`**: `400` (Bad Request)
+- **`message`**: "Duplicate Key Error"
+- **`errorSources`**: Details about the duplicate key (e.g., `"test@example.com already exists"`).
+
+
